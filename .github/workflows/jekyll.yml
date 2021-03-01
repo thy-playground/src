@@ -1,0 +1,58 @@
+# Reference:
+#  https://github.com/limjh16/jekyll-action-ts
+#  https://github.com/peaceiris/actions-gh-pages
+#  https://github.com/helaili/jekyll-action
+#  https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+#  https://github.com/actions/setup-ruby
+#  
+#  
+#  
+name: Jekyll
+
+on:
+  workflow_dispatch:
+    inputs:
+      # ${{ github.event.inputs.jekyll_env }}
+      jekyll_env: 
+        description: prod or dev
+        required: true
+        default: dev
+
+env:
+  dev: thy-playground/thy-playground.github.io
+  prod: prodprod
+
+jobs:
+  build-deploy:
+    runs-on: Ubuntu-20.04 # ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+          bundler-cache: true
+
+      - name: Jekyll-Action
+        uses: limjh16/jekyll-action-ts@v2
+        with:
+          enable_cache: true
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: ${{ env[github.event.inputs.jekyll_env] }}
+          # external_repository: thy-playground/thy-playground.github.io
+          publish_dir: ./_site
+          force_orphan: true
+
+      # - run: echo ${{ env[github.event.inputs.jekyll_env] }}
